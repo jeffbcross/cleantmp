@@ -5,10 +5,13 @@
         "outDir": "dist",
         "target": "es5",
         "noImplicitAny": true,
-        "sourceMap": false,
+        "sourceMap": true,
+        "sourceRoot": "src",
         "moduleResolution": "node",
+        "declaration": true,
         "lib": [
-            "es2015"
+            "es2015",
+            "dom"
         ],
         "typeRoots": [
             "node_modules/@types"
