@@ -15,6 +15,14 @@
     "rimraf": "^2.5.4",
     "rxjs": "^5.0.0-rc.2"
   },
+  "files": [
+    "README.md",
+    "index.js",
+    "index.d.ts",
+    "dist/cleantmp.d.ts",
+    "dist/cleantmp.js",
+    "dist/cleantmp.js.map"
+  ],
   "devDependencies": {
     "@types/jasmine": "^2.5.37",
     "@types/node": "^6.0.46",
