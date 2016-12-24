@@ -30,7 +30,7 @@
     "typescript": "^2.0.9"
   },
   "scripts": {
-    "build": "rimraf dist && tsc",
-    "test": "npm run build && jasmine"
+    "prepublish": "rimraf dist && tsc",
+    "test": "npm run prepublish && jasmine"
   }
 }

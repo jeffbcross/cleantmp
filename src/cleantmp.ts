@@ -7,7 +7,7 @@ import * as minimatch from 'minimatch';
 
 const glob = require('glob');
 
-export default function cleantmp (options: CleantmpOptions = {}): Observable<string> {
+export function cleantmp (options: CleantmpOptions = {}): Observable<string> {
   const prefix = options.prefix || 'tmp';
   return Observable.create((observer: Observer<string>) => {
     let folder: string;

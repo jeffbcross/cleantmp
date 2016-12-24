@@ -1,4 +1,4 @@
-import cleantmp, { WebpackCompilationAssets } from './cleantmp';
+import {cleantmp, WebpackCompilationAssets } from './cleantmp';
 import { Observable } from 'rxjs/Observable';
 import * as fs from 'fs';
 import * as path from 'path';

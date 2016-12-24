@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "ts-node": "^1.7.2",
     "webpack": "^1.14.0"
   }
 }

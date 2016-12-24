@@ -16,5 +16,9 @@
         "typeRoots": [
             "node_modules/@types"
         ]
-    }
+    },
+    "files": [
+        "src/cleantmp.ts",
+        "src/cleantmp.spec.ts"
+    ]
 }
