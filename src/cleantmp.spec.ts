@@ -1,12 +1,28 @@
-import cleantmp from './cleantmp';
+import cleantmp, { WebpackCompilationAssets } from './cleantmp';
 import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/take';
 import * as fs from 'fs';
+import * as path from 'path';
+import * as rimraf from 'rimraf';
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 
 describe('cleantmp', () => {
   const defaultPrefix = 'tmpprefix';
+  const assets: WebpackCompilationAssets = {
+    'package.json': {
+      source: () => '{"foo":"bar"}',
+      size: () => 10
+    }
+  };
+
+  afterEach(() => {
+    fs.readdirSync('.')
+      .filter((p:string) => p.startsWith(defaultPrefix))
+      .forEach((dir: string) => {
+        rimraf.sync(dir);
+      });
+  });
+
   it('should return an observable', () => {
     expect(cleantmp(defaultPrefix) instanceof Observable).toBe(true);
   });
@@ -25,15 +41,23 @@ describe('cleantmp', () => {
       });
   });
 
+  it('should use "tmp" if not provided prefix', (done) => {
+    cleantmp()
+      .take(1)
+      .subscribe((folder: string) => {
+        expect(/^tmp/.test(folder)).toBe(true);
+        done();
+      });
+  });
+
   it('should remove the tmp dir when unsubscribed', (done) => {
     cleantmp(defaultPrefix)
       .take(1)
-      .subscribe(null, null, () => {
+      .subscribe(null, done.fail, () => {
         setTimeout(() => {
           expect(getFilesWithPrefix(defaultPrefix).length).toBe(0);
           done();
         }, 0);
-
       });
   });
 
@@ -52,6 +76,50 @@ describe('cleantmp', () => {
       .subscribe((dir: string) => {
         expect(fs.statSync(dir).isDirectory()).toBe(true);
         done()
+      });
+  });
+
+  it('should copy files from the compilation assets to the dir', (done) => {
+    cleantmp(defaultPrefix, {assets, pattern: '**/*.json'})
+      .take(1)
+      .subscribe((dir: string) => {
+        const contents = fs.readdirSync(dir);
+        expect(contents[0]).toBe('package.json');
+        expect(fs.readFileSync(path.resolve(dir, contents[0]), 'utf-8'))
+          .toBe('{"foo":"bar"}')
+      }, done.fail, done);
+  });
+
+  it('should copy files back from dir to compilation assets', (done) => {
+    const cssContents = '* {color: #f00}';
+    cleantmp(defaultPrefix, { assets, pattern: '**/*.json', copyFolderToAssets: true})
+      .take(1)
+      .subscribe((dir: string) => {
+        fs.writeFileSync(path.resolve(dir, 'myfile.css'), cssContents);
+      }, done.fail, () => {
+        setTimeout(() => {
+          expect(assets['myfile.css'].source()).toBe(cssContents);
+          delete assets['myfile.css'];
+          done();
+        }, 0);
+      });
+  });
+
+
+  it('should copy files back from dir to compilation assets with pattern', (done) => {
+    cleantmp(defaultPrefix, {
+      assets,
+      pattern: '**/*.json',
+      copyFolderToAssets: true,
+      copyFolderToAssetsPattern: '**/*.json'})
+      .take(1)
+      .subscribe((dir: string) => {
+        fs.writeFileSync(path.resolve(dir, 'myfile.css'), '* {color: #f00}');
+      }, done.fail, () => {
+        setTimeout(() => {
+          expect(assets['myfile.css']).toBeUndefined();
+          done();
+        }, 0);
       });
   });
 });

@@ -1,10 +1,14 @@
-import { Observable } from 'rxjs/Observable';
-import { Observer } from 'rxjs/Observer';
-import { mkdtemp } from 'fs';
+import { Observable, Observer } from 'rxjs';
+import { mkdtemp, writeFile } from 'fs';
+import * as fs from 'fs';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
+import * as minimatch from 'minimatch';
 
-export default function cleantmp (prefix?: string): Observable<string> {
+const glob = require('glob');
+
+export default function cleantmp (_prefix?: string, options?: CleantmpOptions): Observable<string> {
+  const prefix = _prefix || 'tmp';
   return Observable.create((observer: Observer<string>) => {
     let folder: string;
     mkdtemp(prefix, (err: NodeJS.ErrnoException, _folder: string) => {
@@ -12,12 +16,62 @@ export default function cleantmp (prefix?: string): Observable<string> {
         observer.error(err);
       } else {
         folder = _folder;
-        observer.next(folder);
+        if (options && options.assets) {
+          copyAssetsToFolder(folder, options.assets, options.pattern)
+            .then(() => {
+              observer.next(folder);
+            }, (err: any) => {
+              observer.error(err);
+            });
+        } else {
+          observer.next(folder);
+        }
       }
     });
 
     return () => {
-      if (folder) rimraf.sync(folder);
+      if (folder) {
+        if (options && options.copyFolderToAssets) copyFolderToAssets(folder, options.assets, options.copyFolderToAssetsPattern)
+        rimraf.sync(folder);
+      }
     };
   });
+}
+
+function copyAssetsToFolder(directory: string, assets: WebpackCompilationAssets, pattern?: string): Promise<void> {
+  return Promise.resolve(Object.keys(assets)
+      .filter((match: string) => minimatch(match, pattern)))
+    .then((matches: string[]) => Promise.all(matches.map((match: string) => {
+        return new Promise((res, rej) => {
+          writeFile(path.resolve(directory, match), assets[match].source(), (err: any) => {
+            if (err) return rej(err);
+            res();
+          });
+        });
+      })));
+}
+
+function copyFolderToAssets(directory: string, assets: WebpackCompilationAssets, pattern?: string) {
+  pattern = pattern || '**/*';
+  glob.sync(pattern, {cwd: directory}).forEach((f: string) => {
+    const source = fs.readFileSync(path.resolve(directory, f)).toString();
+    assets[f] = {
+      source: () => source,
+      size: () => source.length
+    };
+  });
+}
+
+export interface CleantmpOptions {
+  assets?: WebpackCompilationAssets;
+  pattern?: string;
+  copyFolderToAssets?: boolean;
+  copyFolderToAssetsPattern?: string;
+}
+
+export interface WebpackCompilationAssets {
+  [key:string]: {
+    source: () => string,
+    size: () => number
+  }
 }

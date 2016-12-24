@@ -3,18 +3,26 @@
   "version": "1.0.0",
   "description": "Create and cleanup tmp directories.",
   "main": "index.js",
+  "typings": "index.d.ts",
   "author": "jeffbcross",
   "license": "MIT",
   "dependencies": {
+    "@types/chai": "^3.4.34",
+    "@types/minimatch": "^2.0.29",
+    "@types/rimraf": "^0.0.28",
+    "glob": "^7.1.1",
+    "minimatch": "^3.0.3",
+    "rimraf": "^2.5.4",
+    "rxjs": "^5.0.0-rc.2"
+  },
+  "devDependencies": {
     "@types/jasmine": "^2.5.37",
     "@types/node": "^6.0.46",
-    "@types/rimraf": "^0.0.28",
     "jasmine": "^2.5.2",
-    "rimraf": "^2.5.4",
-    "rxjs": "^5.0.0-rc.2",
     "typescript": "^2.0.9"
   },
   "scripts": {
-    "test": "tsc && jasmine"
+    "build": "rimraf dist && tsc",
+    "test": "npm run build && jasmine"
   }
 }
