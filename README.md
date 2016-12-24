@@ -19,7 +19,11 @@ the `CleantmpOptions` interface.
 ### Simple Example
 
 ```typescript
-cleantmp().subscribe(dir => console.log('tmp dir:', dir));
+const cleantmp = require('webpack-util-cleantmp').cleantmp;
+const subscription = cleantmp().subscribe(dir => {
+  console.log('tmp dir:', dir)
+  subscription.unsubscribe();
+});
 ```
 
 ### Interfaces
@@ -48,9 +52,9 @@ export interface WebpackCompilationAssets {
 ### Example Plugin
 
 ```typescript
-import cleantmp from 'webpack-util-cleantmp';
+import {cleantmp} from 'webpack-util-cleantmp';
 
-compiler.plugin('emit', (compilation) => {
+compiler.plugin('emit', (compilation, callback) => {
   const subscription = cleantmp('tmpprefix', {
     assets: compilation.assets,
     globToDisk: '**/*.json'
@@ -60,7 +64,7 @@ compiler.plugin('emit', (compilation) => {
       const fileContents = fs.readFileSync(path.resolve(tmpDir, 'foo.json'), 'utf-8');
       // Unsubscribing == rm -rf <tmpdir>
       subscription.unsubscribe();
+      callback();
     });
 });
 ```
-
