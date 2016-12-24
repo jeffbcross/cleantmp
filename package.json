@@ -1,5 +1,5 @@
 {
-  "name": "cleantmp",
+  "name": "webpack-util-cleantmp",
   "version": "1.0.0",
   "description": "Create and cleanup tmp directories.",
   "main": "index.js",
