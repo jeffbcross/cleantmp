@@ -7,8 +7,8 @@ import * as minimatch from 'minimatch';
 
 const glob = require('glob');
 
-export default function cleantmp (_prefix?: string, options?: CleantmpOptions): Observable<string> {
-  const prefix = _prefix || 'tmp';
+export default function cleantmp (options: CleantmpOptions = {}): Observable<string> {
+  const prefix = options.prefix || 'tmp';
   return Observable.create((observer: Observer<string>) => {
     let folder: string;
     mkdtemp(prefix, (err: NodeJS.ErrnoException, _folder: string) => {
@@ -16,7 +16,7 @@ export default function cleantmp (_prefix?: string, options?: CleantmpOptions): 
         observer.error(err);
       } else {
         folder = _folder;
-        if (options && options.assets) {
+        if (options.assets) {
           copyAssetsToFolder(folder, options.assets, options.pattern)
             .then(() => {
               observer.next(folder);
@@ -63,6 +63,7 @@ function copyFolderToAssets(directory: string, assets: WebpackCompilationAssets,
 }
 
 export interface CleantmpOptions {
+  prefix?: string;
   assets?: WebpackCompilationAssets;
   pattern?: string;
   copyFolderToAssets?: boolean;

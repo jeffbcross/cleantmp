@@ -23,17 +23,18 @@ describe('cleantmp', () => {
       });
   });
 
+
   it('should return an observable', () => {
-    expect(cleantmp(defaultPrefix) instanceof Observable).toBe(true);
+    expect(cleantmp({ prefix: defaultPrefix }) instanceof Observable).toBe(true);
   });
 
   it('should not create a tmp dir immediately', () => {
-    cleantmp(defaultPrefix);
+    cleantmp({ prefix: defaultPrefix });
     expect(getFilesWithPrefix(defaultPrefix).length).toBe(0);
   });
 
   it('should create a tmp dir when subscribed', (done) => {
-    cleantmp(defaultPrefix)
+    cleantmp({ prefix: defaultPrefix })
       .take(1)
       .subscribe(() => {
         expect(getFilesWithPrefix(defaultPrefix).length).toBe(1);
@@ -51,7 +52,7 @@ describe('cleantmp', () => {
   });
 
   it('should remove the tmp dir when unsubscribed', (done) => {
-    cleantmp(defaultPrefix)
+    cleantmp({ prefix: defaultPrefix })
       .take(1)
       .subscribe(null, done.fail, () => {
         setTimeout(() => {
@@ -63,7 +64,7 @@ describe('cleantmp', () => {
 
   it('should emit error if cannot create directory', (done) => {
     const nextSpy = jasmine.createSpy('next');
-    cleantmp(`./dist/foo/bar/baz`)
+    cleantmp({ prefix: `./dist/foo/bar/baz` })
       .subscribe(nextSpy, () => {
         expect(nextSpy).not.toHaveBeenCalled();
         done();
@@ -71,7 +72,7 @@ describe('cleantmp', () => {
   });
 
   it('should create in a different directory if provided', (done) => {
-    cleantmp(`./dist/${defaultPrefix}`)
+    cleantmp({ prefix: `./dist/${defaultPrefix}` })
       .take(1)
       .subscribe((dir: string) => {
         expect(fs.statSync(dir).isDirectory()).toBe(true);
@@ -80,7 +81,7 @@ describe('cleantmp', () => {
   });
 
   it('should copy files from the compilation assets to the dir', (done) => {
-    cleantmp(defaultPrefix, {assets, pattern: '**/*.json'})
+    cleantmp({ prefix: defaultPrefix, assets, pattern: '**/*.json' })
       .take(1)
       .subscribe((dir: string) => {
         const contents = fs.readdirSync(dir);
@@ -92,7 +93,7 @@ describe('cleantmp', () => {
 
   it('should copy files back from dir to compilation assets', (done) => {
     const cssContents = '* {color: #f00}';
-    cleantmp(defaultPrefix, { assets, pattern: '**/*.json', copyFolderToAssets: true})
+    cleantmp({ prefix: defaultPrefix, assets, pattern: '**/*.json', copyFolderToAssets: true})
       .take(1)
       .subscribe((dir: string) => {
         fs.writeFileSync(path.resolve(dir, 'myfile.css'), cssContents);
@@ -107,7 +108,8 @@ describe('cleantmp', () => {
 
 
   it('should copy files back from dir to compilation assets with pattern', (done) => {
-    cleantmp(defaultPrefix, {
+    cleantmp({
+      prefix: defaultPrefix,
       assets,
       pattern: '**/*.json',
       copyFolderToAssets: true,
