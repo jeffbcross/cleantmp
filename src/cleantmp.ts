@@ -17,7 +17,7 @@ export default function cleantmp (options: CleantmpOptions = {}): Observable<str
       } else {
         folder = _folder;
         if (options.assets) {
-          copyAssetsToFolder(folder, options.assets, options.pattern)
+          copyAssetsToFolder(folder, options.assets, options.globToDisk)
             .then(() => {
               observer.next(folder);
             }, (err: any) => {
@@ -31,7 +31,7 @@ export default function cleantmp (options: CleantmpOptions = {}): Observable<str
 
     return () => {
       if (folder) {
-        if (options && options.copyFolderToAssets) copyFolderToAssets(folder, options.assets, options.copyFolderToAssetsPattern)
+        if (options.globFromDisk) copyFolderToAssets(folder, options.assets, options.globFromDisk)
         rimraf.sync(folder);
       }
     };
@@ -65,9 +65,8 @@ function copyFolderToAssets(directory: string, assets: WebpackCompilationAssets,
 export interface CleantmpOptions {
   prefix?: string;
   assets?: WebpackCompilationAssets;
-  pattern?: string;
-  copyFolderToAssets?: boolean;
-  copyFolderToAssetsPattern?: string;
+  globToDisk?: string;
+  globFromDisk?: string;
 }
 
 export interface WebpackCompilationAssets {

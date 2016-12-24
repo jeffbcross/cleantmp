@@ -13,26 +13,28 @@ $ npm install webpack-util-cleantmp
 
 This library provides a single function, `cleantmp`, which returns an `Observable`
 that will resolve with the name of the new directory.
-which accepts two positional optional arguments:
- * `prefix: string`: optional prefix
- * `options: CleantmpOptions`: Additional options
+The `cleantmp` function accepts 1 optional positional argument which conforms to
+the `CleantmpOptions` interface.
 
+### Simple Example
+
+```typescript
+cleantmp().subscribe(dir => console.log('tmp dir:', dir));
+```
 
 ### Interfaces
 
 ```typescript
 interface CleantmpOptions {
   // the compilation.assets object from webpack
-  // Required if `pattern` or `copyFolderToAssetsPattern` are provided.
+  // Required if `globToDisk` or `globFromDisk` are provided.
   assets?: WebpackCompilationAssets;
   // Glob pattern to use to copy compilation assets to fs
   // If no pattern is provided, no assets will be copied to file system.
-  pattern?: string;
-  //
-  copyFolderToAssets?: boolean;
+  globToDisk?: string;
   // Glob pattern to copy file system assets back to compilation assets object
-  // If no pattern provided, no assets will be copied back.
-  copyFolderToAssetsPattern?: string;
+  // If no pattern provided, no assets will be copied back to compilation assets.
+  globFromDisk?: string;
 }
 
 export interface WebpackCompilationAssets {
@@ -51,7 +53,7 @@ import cleantmp from 'webpack-util-cleantmp';
 compiler.plugin('emit', (compilation) => {
   const subscription = cleantmp('tmpprefix', {
     assets: compilation.assets,
-    pattern: '**/*.json'
+    globToDisk: '**/*.json'
   })
     .subscribe((tmpDir: string) => {
       // i.e. tmpDir == tmpprefix8FzVr2

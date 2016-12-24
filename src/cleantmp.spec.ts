@@ -81,7 +81,7 @@ describe('cleantmp', () => {
   });
 
   it('should copy files from the compilation assets to the dir', (done) => {
-    cleantmp({ prefix: defaultPrefix, assets, pattern: '**/*.json' })
+    cleantmp({ prefix: defaultPrefix, assets, globToDisk: '**/*.json' })
       .take(1)
       .subscribe((dir: string) => {
         const contents = fs.readdirSync(dir);
@@ -91,29 +91,13 @@ describe('cleantmp', () => {
       }, done.fail, done);
   });
 
-  it('should copy files back from dir to compilation assets', (done) => {
-    const cssContents = '* {color: #f00}';
-    cleantmp({ prefix: defaultPrefix, assets, pattern: '**/*.json', copyFolderToAssets: true})
-      .take(1)
-      .subscribe((dir: string) => {
-        fs.writeFileSync(path.resolve(dir, 'myfile.css'), cssContents);
-      }, done.fail, () => {
-        setTimeout(() => {
-          expect(assets['myfile.css'].source()).toBe(cssContents);
-          delete assets['myfile.css'];
-          done();
-        }, 0);
-      });
-  });
-
 
   it('should copy files back from dir to compilation assets with pattern', (done) => {
     cleantmp({
       prefix: defaultPrefix,
       assets,
-      pattern: '**/*.json',
-      copyFolderToAssets: true,
-      copyFolderToAssetsPattern: '**/*.json'})
+      globToDisk: '**/*.json',
+      globFromDisk: '**/*.json'})
       .take(1)
       .subscribe((dir: string) => {
         fs.writeFileSync(path.resolve(dir, 'myfile.css'), '* {color: #f00}');
