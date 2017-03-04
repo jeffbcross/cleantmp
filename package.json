@@ -1,6 +1,6 @@
 {
   "name": "webpack-util-cleantmp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Create and cleanup tmp directories.",
   "main": "index.js",
   "typings": "index.d.ts",
@@ -9,9 +9,11 @@
   "dependencies": {
     "@types/chai": "^3.4.34",
     "@types/minimatch": "^2.0.29",
+    "@types/mkdirp": "^0.3.29",
     "@types/rimraf": "^0.0.28",
     "glob": "^7.1.1",
     "minimatch": "^3.0.3",
+    "mkdirp": "^0.5.1",
     "rimraf": "^2.5.4",
     "rxjs": "^5.0.0-rc.2"
   },

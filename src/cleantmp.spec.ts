@@ -15,6 +15,13 @@ describe('cleantmp', () => {
     }
   };
 
+  const assetsWithSubDir: WebpackCompilationAssets = {
+    'dir/package.json': {
+      source: () => '{"foo":"bar"}',
+      size: () => 10
+    }
+  };
+
   afterEach(() => {
     fs.readdirSync('.')
       .filter((p:string) => p.startsWith(defaultPrefix))
@@ -91,6 +98,20 @@ describe('cleantmp', () => {
       }, done.fail, done);
   });
 
+  it('should copy files from the compilation assets to the dir with sub dir', (done) => {
+    cleantmp({ prefix: defaultPrefix, assets: assetsWithSubDir, globToDisk: '**/*.json' })
+      .take(1)
+      .subscribe((dir: string) => {
+        const subdir = fs.readdirSync(dir)[0];
+        expect(subdir).toBe('dir');
+        const subdirFullPath = path.resolve(path.join(dir, subdir))
+        expect(fs.lstatSync(subdirFullPath).isDirectory()).toBe(true);
+        const contents = fs.readdirSync(subdirFullPath);
+        expect(contents[0]).toBe('package.json');
+        expect(fs.readFileSync(path.resolve(subdirFullPath, contents[0]), 'utf-8'))
+          .toBe('{"foo":"bar"}')
+      }, done.fail, done);
+  });
 
   it('should copy files back from dir to compilation assets with pattern', (done) => {
     cleantmp({

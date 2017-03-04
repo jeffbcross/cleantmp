@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
 import * as minimatch from 'minimatch';
+import * as mkdirp from 'mkdirp';
 
 const glob = require('glob');
 
@@ -43,6 +44,8 @@ function copyAssetsToFolder(directory: string, assets: WebpackCompilationAssets,
       .filter((match: string) => minimatch(match, pattern)))
     .then((matches: string[]) => Promise.all(matches.map((match: string) => {
         return new Promise((res, rej) => {
+          const subdir = match.replace(path.basename(match), '');
+          if (subdir) mkdirp.sync(path.join(directory, subdir))          
           writeFile(path.resolve(directory, match), assets[match].source(), (err: any) => {
             if (err) return rej(err);
             res();
